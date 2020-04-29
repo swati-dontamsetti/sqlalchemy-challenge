@@ -20,9 +20,6 @@ Base.prepare(engine, reflect=True)
 Measurement = Base.classes.measurement
 Station = Base.classes.station
 
-# Create our session (link) from Python to the DB
-session = Session(engine)
-
 # Create an app, being sure to pass __name__
 app = Flask(__name__)
 
@@ -47,6 +44,10 @@ def precipitation():
     """Return a JSON list of the dates and percipitation from the last year.
     I am adding the station id for clarity."""
 
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+    session.close()
+
     # latest date
     last = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
     
@@ -67,6 +68,10 @@ def precipitation():
 def stations():
     """Return a JSON list of stations from the dataset."""
 
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+    session.close()
+    
     stations = session.query(Station.station, Station.name).all()
     
     list=[]
@@ -79,6 +84,10 @@ def stations():
 @app.route("/api/v1.0/tobs")
 def tobs():
     """Return a JSON list of Temperature Observations (tobs) for the previous year."""
+
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+    session.close()
 
     # latest date
     last = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
@@ -107,6 +116,10 @@ def start(start):
     """Return a JSON list of TMIN, TAVG, and TMAX
     for all dates greater than and equal to the start date."""
 
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+    session.close()
+    
     results = session.query(func.min(Measurement.tobs),
                      func.max(Measurement.tobs),
                      func.avg(Measurement.tobs))\
@@ -114,7 +127,7 @@ def start(start):
              .order_by(Measurement.date.desc()).all()
 
     for result in results:
-        dict = {"Min Temp (F)": results[0][0], "Max Temp (F)": results[0][1], "Avg Temp (F)": results[0][2]}
+        dict = {"Min Temp (F)": result[0], "Max Temp (F)": result[1], "Avg Temp (F)": result[2]}
 
     return jsonify(dict)
 
@@ -123,6 +136,10 @@ def start_end(start,end):
     """Return a JSON list of TMIN, TAVG, and TMAX
     for all dates greater than and equal to the start date."""
 
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+    session.close()
+    
     results = session.query(func.min(Measurement.tobs),
                      func.max(Measurement.tobs),
                      func.avg(Measurement.tobs))\
@@ -130,7 +147,7 @@ def start_end(start,end):
              .order_by(Measurement.date.desc()).all()
 
     for result in results:
-        dict = {"Min Temp (F)": results[0][0], "Max Temp (F)": results[0][1], "Avg Temp (F)": results[0][2]}
+        dict = {"Min Temp (F)": result[0], "Max Temp (F)": result[1], "Avg Temp (F)": result[2]}
 
     return jsonify(dict)
 
